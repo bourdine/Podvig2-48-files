@@ -18,7 +18,9 @@ android {
 
         externalNativeBuild {
             cmake {
-                cppFlags("-O3 -march=armv8-a+fp+simd -fomit-frame-pointer -funroll-loops")
+                // Базовые флаги для всех архитектур
+                arguments("-DANDROID_STL=c++_shared")
+                cppFlags("-O3 -fomit-frame-pointer -funroll-loops")
                 abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
             }
         }
