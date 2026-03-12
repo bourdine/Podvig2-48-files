@@ -5,16 +5,16 @@
 #define LOG_TAG "NativeMiner"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 
-// Временные заглушки для функций XMRig
+// Моковые данные для демонстрации
 static double mockHashrate = 1250.0;
 static long mockAccepted = 12345;
 static long mockRejected = 123;
 
 extern "C" {
 
-// Заглушки для демонстрации
+// Заглушки для функций XMRig - теперь они определены внутри этого же файла
 int xmrig_start(const char* pool, const char* wallet, int threads) {
-    LOGD("Mock xmrig_start called with pool=%s, wallet=%s", pool, wallet);
+    LOGD("Mock xmrig_start called with pool=%s, wallet=%s, threads=%d", pool, wallet, threads);
     return 0; // успех
 }
 
@@ -44,34 +44,42 @@ Java_com_lottttto_miner_utils_NativeMinerLib_startMining(
 
     const char* pool = env->GetStringUTFChars(poolUrl, nullptr);
     const char* wallet = env->GetStringUTFChars(walletAddress, nullptr);
+    const char* worker = env->GetStringUTFChars(workerName, nullptr);
     
-    LOGD("startMining called - pool: %s, wallet: %s", pool, wallet);
+    LOGD("startMining called - pool: %s, wallet: %s, worker: %s", pool, wallet, worker);
+    
+    // Вызываем нашу заглушку
+    int result = xmrig_start(pool, wallet, threads);
     
     env->ReleaseStringUTFChars(poolUrl, pool);
     env->ReleaseStringUTFChars(walletAddress, wallet);
+    env->ReleaseStringUTFChars(workerName, worker);
+    env->ReleaseStringUTFChars(password, nullptr);
+    env->ReleaseStringUTFChars(algo, nullptr);
     
-    return JNI_TRUE;
+    return result == 0 ? JNI_TRUE : JNI_FALSE;
 }
 
 JNIEXPORT jboolean JNICALL
 Java_com_lottttto_miner_utils_NativeMinerLib_stopMining(JNIEnv* env, jobject thiz) {
     LOGD("stopMining called");
+    xmrig_stop();
     return JNI_TRUE;
 }
 
 JNIEXPORT jdouble JNICALL
 Java_com_lottttto_miner_utils_NativeMinerLib_getHashrate(JNIEnv* env, jobject thiz) {
-    return mockHashrate;
+    return xmrig_hashrate();
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_lottttto_miner_utils_NativeMinerLib_getAcceptedShares(JNIEnv* env, jobject thiz) {
-    return mockAccepted;
+    return xmrig_accepted();
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_lottttto_miner_utils_NativeMinerLib_getRejectedShares(JNIEnv* env, jobject thiz) {
-    return mockRejected;
+    return xmrig_rejected();
 }
 
 }
