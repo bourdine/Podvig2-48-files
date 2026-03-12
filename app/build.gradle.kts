@@ -64,11 +64,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.work:work-runtime-ktx:2.10.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-
-    // Для безопасности (EncryptedSharedPreferences)
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
-
-    // Для работы с JSON (pools.json)
     implementation("com.google.code.gson:gson:2.10.1")
 
     testImplementation("junit:junit:4.13.2")
