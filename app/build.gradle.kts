@@ -16,15 +16,18 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        // Поддержка векторных иконок (временное решение для отсутствующих mipmap)
+        vectorDrawables {
+            useSupportLibrary = true
+        }
+
         externalNativeBuild {
             cmake {
                 cppFlags("-O3 -march=armv8-a+fp+simd -fomit-frame-pointer -funroll-loops")
-                // Исправленный синтаксис для Kotlin DSL
                 abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
             }
         }
         ndk {
-            // Исправленный синтаксис для Kotlin DSL
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
         }
     }
@@ -48,6 +51,11 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.14"
+    }
+
+    // Добавляем AAPT опции для обработки ресурсов
+    aaptOptions {
+        additionalParameters("--no-version-vectors")
     }
 }
 
