@@ -1,29 +1,25 @@
 cmake_minimum_required(VERSION 3.18.1)
 project("lottttto-miner")
 
-# Путь к библиотекам (предполагается, что они лежат в app/libs/${ANDROID_ABI})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../jniLibs/${ANDROID_ABI})
+# Добавляем флаги в зависимости от архитектуры
+if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
+    # Для 64-битной архитектуры используем расширенные инструкции ARMv8
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=armv8-a+fp+simd")
+elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL "armeabi-v7a")
+    # Для 32-битной архитектуры используем стандартные флаги ARMv7 с NEON
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=armv7-a -mfpu=neon -mthumb")
+endif()
 
-# Импортируем библиотеку XMRig 
-add_library(xmrig SHARED IMPORTED)
-set_target_properties(xmrig
-    PROPERTIES
-    IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/${ANDROID_ABI}/libxmrig.so
-)
+# Базовая оптимизация для всех архитектур
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fomit-frame-pointer -funroll-loops")
 
-# Импортируем библиотеку cpuminer (не нужна, так как только Monero)
-# add_library(cpuminer SHARED IMPORTED)
-# set_target_properties(cpuminer
-#     PROPERTIES
-#     IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/${ANDROID_ABI}/libcpuminer.so
-# )
-
-# Наша JNI-обёртка
+# Создаем библиотеку из нашего C++ кода
 add_library(miner_jni SHARED native-lib.cpp)
 
+# Находим системную библиотеку для логирования
 find_library(log-lib log)
 
+# Линкуем нашу библиотеку с системными библиотеками
 target_link_libraries(miner_jni
-    xmrig
     ${log-lib}
 )
