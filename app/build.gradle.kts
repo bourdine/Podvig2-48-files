@@ -20,8 +20,9 @@ android {
 
         externalNativeBuild {
             cmake {
-                arguments "-DANDROID_STL=c++_shared"
-                cppFlags "-O3 -fomit-frame-pointer -funroll-loops"
+                // ВАЖНО: используем = для присваивания в Kotlin DSL
+                arguments = listOf("-DANDROID_STL=c++_shared")
+                cppFlags = "-O3 -fomit-frame-pointer -funroll-loops"
                 abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
             }
         }
@@ -32,7 +33,7 @@ android {
 
     externalNativeBuild {
         cmake {
-            path("src/main/cpp/CMakeLists.txt")
+            path = file("src/main/cpp/CMakeLists.txt")
         }
     }
 
