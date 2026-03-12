@@ -95,7 +95,7 @@ private fun getTermsText(): String = """
     We may update this Agreement from time to time. Continued use of the App constitutes acceptance of the new terms.
     
     8. GOVERNING LAW
-    This Agreement shall be governed by the laws of [Your Country].
+    This Agreement shall be governed by the laws.
     
-    Last updated: April 2025
+    Last updated: March 2026.
 """.trimIndent()
