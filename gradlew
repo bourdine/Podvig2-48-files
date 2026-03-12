@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# Copyright © 2015-2021 the original authors.
+# Copyright © 2015 the original authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
 #
 
 ##############################################################################
@@ -55,7 +57,7 @@
 #       Darwin, MinGW, and NonStop.
 #
 #   (3) This script is generated from the Groovy template
-#       https://github.com/gradle/gradle/blob/HEAD/subprojects/launcher/src/main/resources/org/gradle/launcher/bin/gradle
+#       https://github.com/gradle/gradle/blob/84fcf1dafd5cd2c8502c58c2fdbbca9bb2468257/platforms/jvm/plugins-application/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
 #       within the Gradle project.
 #
 #       You can find Gradle at https://github.com/gradle/gradle/.
@@ -82,9 +84,9 @@ done
 
 # This is normally unused
 # shellcheck disable=SC2034
-APP_BASE_NAME=${app_path##*/}
-# Discard cd standard output in case $CDPATH is set https://github.com/gradle/gradle/issues/25036
-APP_HOME=$( cd "${APP_HOME:-./}" && pwd -P ) || exit
+APP_BASE_NAME=${0##*/}
+# Discard cd standard output in case $CDPATH is set (https://github.com/gradle/gradle/issues/25036)
+APP_HOME=$( cd -P "${APP_HOME:-./}" > /dev/null && printf '%s\n' "$PWD" ) || exit
 
 # Use the maximum available, or set MAX_FD != -1 to use that value.
 MAX_FD=maximum
@@ -112,7 +114,6 @@ case "$( uname )" in                #(
   NONSTOP* )        nonstop=true ;;
 esac
 
-CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
 
 
 # Determine the Java command to use to start the JVM.
@@ -131,10 +132,13 @@ location of your Java installation."
     fi
 else
     JAVACMD=java
-    which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+    if ! command -v java >/dev/null 2>&1
+    then
+        die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
 
 Please set the JAVA_HOME variable in your environment to match the
 location of your Java installation."
+    fi
 fi
 
 # Increase the maximum file descriptors if we can.
@@ -156,128 +160,89 @@ if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
     esac
 fi
 
-# Collect all arguments for the java command, stacking in reverse order to eventually pass to java.
-# We cannot use "$@" because it could be made empty by splitting arguments over multiple lines.
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
 
-# We might have to delegate argument parsing to a Java executable to be able to:
-#   * detect '-x' and unpack -Dkey=value arguments that come before the main class, or
-#   * handle cases where the main class is 'gradle.wrapper.GradleWrapperMain' and the 
-#     application 'properties' task should be run, etc.
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
 
-# Decode and use JVM options, environment variables, and command-line arguments.
-# JVM options are those that start with '-D', '-X', or '-XX:'. 
-# Environment variables are GRADLE_OPTS, JAVA_OPTS, and DEFAULT_JVM_OPTS.
-# Command-line arguments are the rest.
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
 
-# Set DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS variables if they are not already set.
-# These variables control the JVM execution.
-DEFAULT_JVM_OPTS=${DEFAULT_JVM_OPTS:-"-Xmx64m" "-Xms64m"}
-JAVA_OPTS=${JAVA_OPTS:-}
-GRADLE_OPTS=${GRADLE_OPTS:-}
-
-# We use a subshell to isolate the argument collection process from the current shell.
-# The subshell's output is captured and used to set the final arguments.
-# This is done in a subshell to avoid polluting the current environment with temporary variables.
-(
-    # Print the help message if the first argument is '-h' or '--help'.
-    # This is not the only help check; the wrapper script also checks for help in the Java code.
-    if [ "$1" = '-h' ] || [ "$1" = '--help' ]; then
-        cat <<EOF
-Usage: gradlew [option...] [task...]
-
-Options:
-  -h, --help                 Show this help message and exit.
-  -D<name>=<value>           Set a system property.
-  -P<name>=<value>           Set a project property.
-  --no-daemon                Do not use the Gradle daemon.
-  --daemon                   Use the Gradle daemon (default).
-  --stop                     Stop the Gradle daemon.
-  --status                   Show status of running daemons.
-  --no-build-cache           Disable the build cache.
-  --build-cache              Enable the build cache.
-  --configuration-cache      Enable the configuration cache.
-  --no-configuration-cache   Disable the configuration cache.
-  --configuration-cache-problems={fail,warn}
-                             Configure action on configuration cache problems.
-  --refresh-keys             Refresh keys used for signing build scripts.
-  --export-keys              Export public keys used for dependency verification.
-  --update-locks <group:module>...
-                             Update dependency lock for given modules.
-  --write-locks              Write dependency lock state.
-  --build-file, -b <file>    Specify the build file.
-  --settings-file, -c <file> Specify the settings file.
-  --gradle-user-home <dir>   Specify the Gradle user home directory.
-  --project-cache-dir <dir>  Specify the project cache directory.
-  --project-dir <dir>        Specify the start directory for Gradle.
-  --include-build <dir>      Include the specified build in the composite.
-  --offline                  Work without accessing network resources.
-  --refresh-dependencies     Refresh the state of dependencies.
-  --parallel                 Build projects in parallel.
-  --no-parallel              Disable parallel project execution.
-  --max-workers <n>          Set the maximum number of workers.
-  --configure-on-demand      Only configure necessary projects.
-  --no-configure-on-demand   Disable configure on demand.
-  --continuous, -t           Continuous build (listen for file changes).
-  --no-continuous            Disable continuous build.
-  --rerun-tasks              Ignore previously cached task results.
-  --profile                  Generate profile report.
-  --scan                     Create a build scan.
-  --no-scan                  Disable build scan creation.
-  --info                     Set log level to info.
-  --debug                    Set log level to debug.
-  --quiet, -q                Set log level to quiet (errors only).
-  --warn                     Set log level to warn.
-  --stacktrace               Print out the stacktrace for all exceptions.
-  --full-stacktrace          Print out the full (very verbose) stacktrace.
-  --no-stacktrace            Do not print stacktraces.
-  --build-cache-debug        Show build cache debug information.
-  --no-build-cache-debug     Disable build cache debug output.
-  --help                     Show this help message and exit.
-
-Tasks:
-  tasks                      Displays the tasks runnable from root project.
-  build                      Assembles and tests this project.
-  assemble                   Assembles the outputs of this project.
-  check                      Runs all checks.
-  clean                      Deletes the build directory.
-  test                       Runs the unit tests.
-  javadoc                    Generates Javadoc API documentation for the main source code.
-  wrapper                    Generates Gradle wrapper files.
-
-Project-specific tasks can be found by running './gradlew tasks'.
-
-Example:
-  ./gradlew build
-EOF
-        exit 0
-    fi
-
-    # Collect all arguments, handling multi-line arguments and globs.
-    # We want to collect them in a way that preserves any quoting and escaping.
-    # This loop will append each argument to the array '$@' after processing.
-    while [ $# -gt 0 ]; do
-        # Save the current argument for later processing.
-        arg="$1"
-        shift
-
-        # If the argument is a file, expand it (handles globs and directories).
-        # This is needed for passing file names that contain spaces, for example.
-        # We use 'test -f' to check if it's a file.
-        # Note: This is not 100% reliable because it doesn't handle symlinks or other special files perfectly.
-        if [ -f "$arg" ]; then
-            # If it's a file, add it as is.
-            set -- "$@" "$arg"
-        else
-            # For non-file arguments, we need to handle quoting and escaping.
-            # This is tricky in a POSIX shell, but we can use 'printf' to do it.
-            # We'll just add the argument as is; Java will handle escaping.
-            set -- "$@" "$arg"
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
         fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
     done
+fi
 
-    # Pass the collected arguments to the Java command.
-    exec "$JAVACMD" $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS \
-        -classpath "$CLASSPATH" \
-        org.gradle.wrapper.GradleWrapperMain \
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='-Dfile.encoding=UTF-8 "-Xmx64m" "-Xms64m"'
+
+# Collect all arguments for the java command:
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and optsEnvironmentVar are not allowed to contain shell fragments,
+#     and any embedded shellness will be escaped.
+#   * For example: A user cannot expect ${Hostname} to be expanded, as it is an environment variable and will be
+#     treated as '${Hostname}' itself on the command line.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -jar "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" \
         "$@"
-) || die "Failed to execute Gradle"
+
+# Stop when "xargs" is not available.
+if ! command -v xargs >/dev/null 2>&1
+then
+    die "xargs is not available"
+fi
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
