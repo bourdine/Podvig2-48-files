@@ -73,28 +73,17 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     
-    // Hilt
     implementation("com.google.dagger:hilt-android:2.52")
     kapt("com.google.dagger:hilt-android-compiler:2.52")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     
-    // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
-    
-    // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.10.0")
-    
-    // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-    
-    // Security (EncryptedSharedPreferences)
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    
-    // Gson for JSON parsing
     implementation("com.google.code.gson:gson:2.10.1")
 
     testImplementation("junit:junit:4.13.2")
-    
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.11.00"))
