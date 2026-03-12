@@ -1,41 +1,40 @@
 #include <jni.h>
 #include <android/log.h>
-#include <thread>
-#include <atomic>
-#include <cstring>
-#include <unistd.h>  // ВАЖНО: добавлено для sleep()
+#include <unistd.h>
 
 #define LOG_TAG "NativeMiner"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-// Заглушки для функций XMRig (реальные будут из библиотеки)
-extern "C" {
-    int xmrig_start(const char* pool, const char* wallet, int threads);
-    void xmrig_stop();
-    double xmrig_hashrate();
-    long xmrig_accepted();
-    long xmrig_rejected();
-}
-
-static std::atomic<bool> isRunning{false};
-static double currentHashrate = 0.0;
-static long acceptedShares = 0;
-static long rejectedShares = 0;
-
-// Поток мониторинга
-void* monitorThread(void* arg) {
-    while (isRunning) {
-        currentHashrate = xmrig_hashrate();
-        acceptedShares = xmrig_accepted();
-        rejectedShares = xmrig_rejected();
-        sleep(2);  // теперь будет работать
-    }
-    return nullptr;
-}
+// Временные заглушки для функций XMRig
+static double mockHashrate = 1250.0;
+static long mockAccepted = 12345;
+static long mockRejected = 123;
 
 extern "C" {
 
+// Заглушки для демонстрации
+int xmrig_start(const char* pool, const char* wallet, int threads) {
+    LOGD("Mock xmrig_start called with pool=%s, wallet=%s", pool, wallet);
+    return 0; // успех
+}
+
+void xmrig_stop() {
+    LOGD("Mock xmrig_stop called");
+}
+
+double xmrig_hashrate() {
+    return mockHashrate;
+}
+
+long xmrig_accepted() {
+    return mockAccepted;
+}
+
+long xmrig_rejected() {
+    return mockRejected;
+}
+
+// JNI методы
 JNIEXPORT jboolean JNICALL
 Java_com_lottttto_miner_utils_NativeMinerLib_startMining(
         JNIEnv* env, jobject thiz,
@@ -43,55 +42,36 @@ Java_com_lottttto_miner_utils_NativeMinerLib_startMining(
         jstring workerName, jstring password,
         jstring algo, jint threads) {
 
-    if (isRunning) {
-        return JNI_TRUE;
-    }
-
     const char* pool = env->GetStringUTFChars(poolUrl, nullptr);
     const char* wallet = env->GetStringUTFChars(walletAddress, nullptr);
-    const char* pass = env->GetStringUTFChars(password, nullptr);
-    const char* algoStr = env->GetStringUTFChars(algo, nullptr);
-
-    int result = xmrig_start(pool, wallet, threads);
-
-    if (result == 0) {
-        isRunning = true;
-        pthread_t thread;
-        pthread_create(&thread, nullptr, monitorThread, nullptr);
-        pthread_detach(thread);
-    }
-
+    
+    LOGD("startMining called - pool: %s, wallet: %s", pool, wallet);
+    
     env->ReleaseStringUTFChars(poolUrl, pool);
     env->ReleaseStringUTFChars(walletAddress, wallet);
-    env->ReleaseStringUTFChars(password, pass);
-    env->ReleaseStringUTFChars(algo, algoStr);
-
-    return result == 0 ? JNI_TRUE : JNI_FALSE;
+    
+    return JNI_TRUE;
 }
 
 JNIEXPORT jboolean JNICALL
 Java_com_lottttto_miner_utils_NativeMinerLib_stopMining(JNIEnv* env, jobject thiz) {
-    if (!isRunning) {
-        return JNI_TRUE;
-    }
-    isRunning = false;
-    xmrig_stop();
+    LOGD("stopMining called");
     return JNI_TRUE;
 }
 
 JNIEXPORT jdouble JNICALL
 Java_com_lottttto_miner_utils_NativeMinerLib_getHashrate(JNIEnv* env, jobject thiz) {
-    return currentHashrate;
+    return mockHashrate;
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_lottttto_miner_utils_NativeMinerLib_getAcceptedShares(JNIEnv* env, jobject thiz) {
-    return acceptedShares;
+    return mockAccepted;
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_lottttto_miner_utils_NativeMinerLib_getRejectedShares(JNIEnv* env, jobject thiz) {
-    return rejectedShares;
+    return mockRejected;
 }
 
 }
