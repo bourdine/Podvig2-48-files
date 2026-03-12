@@ -3,28 +3,13 @@
 #include <thread>
 #include <atomic>
 #include <cstring>
+#include <unistd.h>  // добавлено для sleep()
 
 #define LOG_TAG "NativeMiner"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-// Структура для параметров майнинга
-struct MinerParams {
-    char poolUrl[256];
-    char wallet[128];
-    char password[64];
-    char algo[32];
-    int threads;
-    bool isRunning;
-};
-
-static std::atomic<bool> isRunning{false};
-static std::thread miningThread;
-static double currentHashrate = 0.0;
-static long acceptedShares = 0;
-static long rejectedShares = 0;
-
-// Заглушка для функций XMRig (реальные будут из библиотеки)
+// Заглушки для функций XMRig (реальные будут из библиотеки)
 extern "C" {
     int xmrig_start(const char* pool, const char* wallet, int threads);
     void xmrig_stop();
@@ -33,13 +18,18 @@ extern "C" {
     long xmrig_rejected();
 }
 
+static std::atomic<bool> isRunning{false};
+static double currentHashrate = 0.0;
+static long acceptedShares = 0;
+static long rejectedShares = 0;
+
 // Поток мониторинга
 void* monitorThread(void* arg) {
     while (isRunning) {
         currentHashrate = xmrig_hashrate();
         acceptedShares = xmrig_accepted();
         rejectedShares = xmrig_rejected();
-        sleep(2);
+        sleep(2);  // теперь будет работать
     }
     return nullptr;
 }
@@ -62,12 +52,10 @@ Java_com_lottttto_miner_utils_NativeMinerLib_startMining(
     const char* pass = env->GetStringUTFChars(password, nullptr);
     const char* algoStr = env->GetStringUTFChars(algo, nullptr);
 
-    // Запуск XMRig
     int result = xmrig_start(pool, wallet, threads);
 
     if (result == 0) {
         isRunning = true;
-        // Запускаем поток мониторинга
         pthread_t thread;
         pthread_create(&thread, nullptr, monitorThread, nullptr);
         pthread_detach(thread);
