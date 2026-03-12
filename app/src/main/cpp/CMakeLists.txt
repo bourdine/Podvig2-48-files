@@ -3,11 +3,7 @@ project("lottttto-miner")
 
 # Добавляем флаги в зависимости от архитектуры
 if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
-    # Для 64-битной архитектуры используем расширенные инструкции ARMv8
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=armv8-a+fp+simd")
-elseif(CMAKE_ANDROID_ARCH_ABI STREQUAL "armeabi-v7a")
-    # Для 32-битной архитектуры используем стандартные флаги ARMv7 с NEON
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=armv7-a -mfpu=neon -mthumb")
 endif()
 
 # Базовая оптимизация для всех архитектур
