@@ -3,7 +3,7 @@
 #include <thread>
 #include <atomic>
 #include <cstring>
-#include <unistd.h>  // добавлено для sleep()
+#include <unistd.h>  // ВАЖНО: добавлено для sleep()
 
 #define LOG_TAG "NativeMiner"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
