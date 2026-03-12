@@ -19,11 +19,13 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags("-O3 -march=armv8-a+fp+simd -fomit-frame-pointer -funroll-loops")
-                abiFilters("armeabi-v7a", "arm64-v8a")
+                // Исправленный синтаксис для Kotlin DSL
+                abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
             }
         }
         ndk {
-            abiFilters("armeabi-v7a", "arm64-v8a")
+            // Исправленный синтаксис для Kotlin DSL
+            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
         }
     }
 
