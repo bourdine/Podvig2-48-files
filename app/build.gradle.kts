@@ -16,11 +16,6 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // Поддержка векторных иконок (временное решение для отсутствующих mipmap)
-        vectorDrawables {
-            useSupportLibrary = true
-        }
-
         externalNativeBuild {
             cmake {
                 cppFlags("-O3 -march=armv8-a+fp+simd -fomit-frame-pointer -funroll-loops")
@@ -51,11 +46,6 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.14"
-    }
-
-    // Добавляем AAPT опции для обработки ресурсов
-    aaptOptions {
-        additionalParameters("--no-version-vectors")
     }
 }
 
