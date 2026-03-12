@@ -1,8 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    // id("com.google.dagger.hilt.android") - временно отключаем
-    // kotlin("kapt") - временно отключаем
+    id("com.google.dagger.hilt.android")
+    kotlin("kapt")
 }
 
 android {
@@ -15,6 +15,8 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         externalNativeBuild {
             cmake {
@@ -73,10 +75,10 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     
-    // Hilt временно отключен
-    // implementation("com.google.dagger:hilt-android:2.52")
-    // kapt("com.google.dagger:hilt-android-compiler:2.52")
-    // implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    // Hilt для внедрения зависимостей
+    implementation("com.google.dagger:hilt-android:2.52")
+    kapt("com.google.dagger:hilt-android-compiler:2.52")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.work:work-runtime-ktx:2.10.0")
@@ -94,7 +96,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
 
-// kapt временно отключен
-// kapt {
-//     correctErrorTypes = true
-// }
+kapt {
+    correctErrorTypes = true
+}
