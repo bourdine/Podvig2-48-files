@@ -20,9 +20,11 @@ android {
 
         externalNativeBuild {
             cmake {
-                // ВАЖНО: используем = для присваивания в Kotlin DSL
-                arguments = listOf("-DANDROID_STL=c++_shared")
-                cppFlags = "-O3 -fomit-frame-pointer -funroll-loops"
+                // Правильный синтаксис для Kotlin DSL
+                arguments.addAll(listOf("-DANDROID_STL=c++_shared"))
+                cppFlags.add("-O3")
+                cppFlags.add("-fomit-frame-pointer")
+                cppFlags.add("-funroll-loops")
                 abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
             }
         }
