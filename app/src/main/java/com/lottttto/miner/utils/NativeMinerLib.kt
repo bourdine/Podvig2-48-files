@@ -7,7 +7,7 @@ class NativeMinerLib {
         init {
             try {
                 System.loadLibrary("miner_jni")
-                Log.d("NativeMinerLib", "Native library loaded")
+                Log.d("NativeMinerLib", "Native library loaded successfully")
             } catch (e: UnsatisfiedLinkError) {
                 Log.e("NativeMinerLib", "Failed to load native library", e)
             }
