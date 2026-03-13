@@ -10,38 +10,32 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.lottttto.miner.ui.theme.LotttttoTheme
-import dagger.hilt.android.AndroidEntryPoint
+import androidx.compose.ui.unit.sp
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            LotttttoTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Lottttto Miner")
-                }
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                Greeting()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+fun Greeting() {
     Text(
-        text = "Hello $name!",
-        modifier = modifier
+        text = "Lottttto Miner",
+        fontSize = 24.sp
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    LotttttoTheme {
-        Greeting("Lottttto Miner")
-    }
+    Greeting()
 }
