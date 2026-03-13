@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:name=".LotttttoApp"
         android:allowBackup="true"
-        android:label="@string/app_name"
+        android:label="Lottttto Miner"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Lottttto"
-        tools:targetApi="31">
+        android:theme="@style/Theme.Lottttto">
         
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Lottttto">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
