@@ -1,7 +1,6 @@
 package com.lottttto.miner
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,34 +10,53 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.lottttto.miner.ui.theme.LotttttoTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Добавляем логирование для отладки
-        Log.d("MainActivity", "onCreate started")
-        
         setContent {
             LotttttoTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting()
+                    AppNavigation()
                 }
             }
         }
-        
-        Log.d("MainActivity", "setContent completed")
     }
 }
 
 @Composable
-fun Greeting() {
+fun AppNavigation() {
+    val navController = rememberNavController()
+    
+    NavHost(navController = navController, startDestination = "main") {
+        composable("main") {
+            MainScreen()
+        }
+        composable("wallet") {
+            WalletScreen()
+        }
+    }
+}
+
+@Composable
+fun MainScreen() {
     Text(
-        text = "Lottttto Miner",
-        fontSize = 24.sp
+        text = "Lottttto Miner - Main Screen",
+        fontSize = 20.sp
+    )
+}
+
+@Composable
+fun WalletScreen() {
+    Text(
+        text = "Wallet Screen",
+        fontSize = 20.sp
     )
 }
